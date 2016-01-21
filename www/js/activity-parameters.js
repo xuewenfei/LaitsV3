@@ -94,7 +94,7 @@ define([
 					allowPrettify:true,
 					allowHelp: true,
 					allowLessonsLearned:true,
-					allowDeleteNode: true,
+					allowDeleteNode: false,
 					allowEditNode: true,
 
 					showHints: true,

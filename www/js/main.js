@@ -1429,6 +1429,8 @@ define([
 						drawModel.deleteNode(controllerObject.currentID);
 						registry.byId("nodeeditor").hide();
 					});
+				} else {
+					style.set(registry.byId("deleteButton").domNode,"display","none");
 				}
 				//debugger;
 				// attaching author History widget
