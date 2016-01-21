@@ -293,9 +293,6 @@ define([
 				controllerObject._PM.setLogging(session);  // Set up direct logging in PM
 			}
 			controllerObject.setLogging(session); // set up direct logging in controller
-			if(query.m != 'AUTHOR'){
-				controllerObject.setAssessment(session); //set up assessment for student.
-			}
 			equation.setLogging(session);
 
 			/*
@@ -419,7 +416,6 @@ define([
 			palTopicIndex = "";
 			var tc = null;
 			var searchPattern = new RegExp('^pal3', 'i');
-			
 			if(query.m != "AUTHOR" && searchPattern.test(query.s)){
 				activity_config["PAL3"] = true;
 				var xhrArgs = {
@@ -450,7 +446,8 @@ define([
 				// send score after student complete the model
 				aspect.after(controllerObject._PM, "notifyCompleteness", function(){
 					if(!etConnect ||  !etConnect.needsToSendScore || !givenModel.isCompleteFlag) return;
-					var score = controllerObject._assessment.getSuccessFactor();
+					// var score = controllerObject._assessment.getSuccessFactor();
+					var score=controllerObject._assessment.getSchemasAverageFactor();
 					etConnect.sendScore(score);
 					console.log("sending score(successfactor):", score);
 				});

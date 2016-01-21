@@ -253,11 +253,32 @@ define([
 			this.updateType(type);
 			this.applyDirectives(this._PM.processAnswer(this.currentID, 'type', type));
 
-			// "Initial Value" label --> "Value" for parameters
+			// Hide the value and expression controls in the node editor, depending on the type of node
 			var type=this._model.active.getType(this.currentID);
-			if (type=="parameter") style.set('initLabel', 'display', 'none');
-			else style.set('initLabel',"display","inline");
+			this.adjustStudentNodeEditor(type);
+		},	
 
+		// Hide the value and expression controls in the node editor, depending on the type of node
+		adjustStudentNodeEditor: function(type){
+
+			if (type=="function"){
+				// style.set('valueDiv','display', 'none');
+				style.set('valueDiv','visibility', 'hidden');
+				style.set('expressionDiv', 'display', 'block');
+			}
+			else if (type=="parameter"){
+				// style.set('valueDiv','display', 'inline');
+				style.set('valueDiv','visibility', 'visible');
+				style.set('initLabel', 'display', 'none');				
+				style.set('expressionDiv', 'display', 'none');
+			}
+			else{
+				style.set('expressionDiv', 'display', 'block');
+				style.set('valueDiv','visibility', 'visible');
+				// style.set('valueDiv','display', 'inline');			
+				style.set('initLabel', 'display', 'inline');
+
+			}
 		},
 
 		typeSet: function (value) {
@@ -328,14 +349,27 @@ define([
 		},
 		equationDoneHandler: function () {
 			var directives = [];
-			if (this.isExpressionChanged())
+			/*if (this.isExpressionChanged())
 				return; //2365 fix, just to check pattern change, not evaluating
-			var parse = this.equationAnalysis(directives, false);
+			*/var parse = this.equationAnalysis(directives, false);
+			console.log("************",parse);
 			if (parse) {
 				var dd = this._PM.processAnswer(this.currentID, 'equation', parse, registry.byId(this.controlMap.equation).get("value"));
 				directives = directives.concat(dd);
 			}
-
+			var context = this;
+			directives.every(function(ele){
+				
+				if(ele.attribute != 'status' || ele.value != 'incorrect') return true;  
+				var d, s;
+				d = (s = context.expressionSuggestor(context.currentID, parse)) ? 
+					{ attribute : "append",
+						id : "message",
+						value : s
+					} : null;
+				directives.push(d);
+				return false;
+			})
 			this.applyDirectives(directives);
 
 			var isDemo = false;

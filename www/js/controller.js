@@ -206,7 +206,7 @@ define([
 			domStyle.set(this.domNode, 'backgroundColor', value ? colorMap[value] : '');
 		},
 
-		_setUpNodeEditor: function(){
+		_setUpNodeEditor: function(){;
 			// get Node Editor widget from tree
 			this._nodeEditor = registry.byId('nodeeditor');
 
@@ -217,6 +217,7 @@ define([
 				var myThis = this;
 				return function(){
 					var equation = registry.byId("equationBox");
+					
 					if(equation.value && !myThis.equationEntered){
 						var directives = myThis.equationDoneHandler();
 						var isAlertShown = array.some(directives, function(directive){
@@ -885,6 +886,7 @@ define([
 		},
 
 		equationAnalysis: function(directives, ignoreUnknownTest){
+			
 			this.equationEntered = true;
 			console.log("****** enter button");
 			/*
@@ -934,7 +936,48 @@ define([
 			}
 			return null;
 		},
-
+		expressionSuggestor : function(id, answer){
+			//output: message directive, suggestion message 
+			id = this._model.active.getDescriptionID(id);
+			var givenExpression = this._model.given.getEquation(id);
+			var givenAnswer = expression.parse(givenExpression);
+			var hash = {}
+			var required = [];
+			var not_required = [];
+			var context = this;
+			givenAnswer.tokens.every(function(ele){
+				if(ele.type_ != 3) return true;
+				hash[context._model.given.getName(ele.index_)] = 'given';
+				return true;
+			});
+			answer.tokens.every(function(ele){
+				if(ele.type_ != 3) return true;
+				hash[ele.index_] = (typeof hash[ele.index_] == 'undefined') ? 'active' : false
+				return true;
+			});
+			for(var key in hash){ 
+				if(hash[key] == 'given') required.push({ 'name' : key, 'type' : 'node' });
+				if(hash[key] == 'active') not_required.push({ 'name' : key, 'type' : 'node' });
+			}
+			var r_len = required.length;
+			var nr_len = not_required.length;
+			var rsp = null; 
+			if(r_len == 0 && nr_len == 0){
+				rsp = null;
+			}
+			else if(r_len && nr_len && required[r_len -1].type == not_required[nr_len -1].type) {
+				rsp = "The author does not wants you to use " + not_required.pop().name + " in this expression,"
+				rsp += " try using " + required.pop().name + " instead";
+			}
+			else if(r_len){
+				rsp = "The author wants you to use " + required.pop().name + " in the expression";
+			}
+			else {
+				rsp = "The author does not want you to use " + not_required.pop().name + " in the expression";
+			}
+			return rsp;
+						
+		},
 		createExpressionNodes: function(parse, ignoreUnknownTest){
 			/*
 			 Create Expression nodes if equation is valid and parsed sucessfully.
@@ -952,6 +995,11 @@ define([
 			if(parse){
 				var inputNodesList = [];
 				var cancelUpdate = false;
+				var directives = [];
+
+				var widget = registry.byId(this.controlMap.equation);
+				var inputEquation = widget.get("value");
+
 				//getDescriptionID is present only in student mode. So in author mode it will give an identity function. This is a work around in case when its in author mode at that time the given model is the actual model. So descriptionID etc are not available. 
 				var mapID = this._model.active.getDescriptionID || function(x){ return x; };
 				var unMapID = this._model.active.getNodeIDFor || function(x){ return x; };
@@ -1052,7 +1100,7 @@ define([
 						}else{
 							this._model.given.setAttemptCount(descriptionID, "unknownVar", 1);
 						}
-
+						directives.push({id: 'equation', attribute: 'status', value: 'incorrect'});
 						directives.push({id: 'message', attribute: 'append', value: "Unknown variable '" + variable + "'."});
 						this.logging.log("solution-step", {
 							type: "unknown-variable",
@@ -1065,7 +1113,11 @@ define([
 						});
 					}
 				}, this);
-
+				if(directives.length > 0){
+					this._model.active.setEquation(this.currentID, inputEquation);
+					this.applyDirectives(directives);
+					return;
+				}
 				//Check to see if there are unknown variables in parsedEquation if in student mode
 				//If unknown variable exist, do not update equation in model. 
 				//Do the same if a function node references itself.
@@ -1119,6 +1171,24 @@ define([
 			// console.log("======== setConnections fired for node" + to);
 		},
 
+		// Hide the value and expression controls in the node editor, depending on the type of node	
+		adjustNodeEditor: function(type){
+			if (type=="function"){
+				domStyle.set('valueDiv','visibility', 'hidden');
+				domStyle.set('expressionDiv', 'display', 'block');
+			}
+			else if (type=="parameter"){
+				domStyle.set('valueDiv','visibility', 'visible');
+				domStyle.set('initLabel', 'display', 'none');				
+				domStyle.set('expressionDiv', 'display', 'none');
+			}
+			else{				
+				domStyle.set('expressionDiv', 'display', 'block');
+				domStyle.set('valueDiv','visibility', 'visible');	
+				domStyle.set('initLabel', 'display', 'inline');
+			}
+		},
+
 		//show node editor
 		showNodeEditor: function(/*string*/ id){
 			//Checks if the current mode is COACHED mode and exit from node editor if all the modes are defined
@@ -1129,10 +1199,9 @@ define([
 			this.initialControlSettings(id);
 			this.populateNodeEditorFields(id);
 
-			// "Initial Value" label --> "Value" for parameters			
+			// Hide the value and expression controls in the node editor, depending on the type of node		
 			var type=this._model.active.getType(this.currentID);
-			if (type=="parameter") 	domStyle.set('initLabel', 'display', 'none');
-			else domStyle.set('initLabel',"display","inline");
+			this.adjustNodeEditor(type);
 
 			this._nodeEditor.show().then(lang.hitch(this, function(){
 				this.disableHandlers = false;

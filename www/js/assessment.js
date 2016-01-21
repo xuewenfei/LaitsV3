@@ -124,8 +124,8 @@ define([
 					if(schema.nodes.indexOf(errors.given) >= 0){
 						schema.competence.errors += errors.errors;
 						schema.competence.total += errors.total;
-						schema.competence.correctScore += this.currentScore.hasOwnProperty(errors.given) ? 
-															this.currentScore[errors.given] : 0;
+						schema.competence.correctScore += (this.currentScore.hasOwnProperty(errors.given) ? 
+															this.currentScore[errors.given] : 0);
 						//schema.competence.timeSpent += error.time
 					}
 				}, this);
@@ -228,6 +228,17 @@ define([
 			}, this);
 
 			return obj;
+		},
+
+		getSchemasAverageFactor: function(){
+			var schemaSuccessFactor = this.getSchemaSuccessFactor();
+			var scoreSum=0;
+			array.forEach(this._schemas, function(schema){ 
+				scoreSum += schemaSuccessFactor[schema.schemaClass];
+			});
+			var averageScore=scoreSum / ( this._schemas.length || 1 );
+			//consol.log("The average schamas factor returned as success factor is: ", averageScore);
+			return averageScore;
 		},
 
 		calculateNodeScore: function(/* string */ id, /* boolean */ ignoreExecution){

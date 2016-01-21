@@ -27,8 +27,8 @@ describe("Coached mode with correct diode resistor 2", function() {
     before(async(function (done) {
         var date = new Date();
         dtest.openProblem(client,[["problem","diode-resistor"],["mode","COACHED"],
-                                  ["section","PAL3-test"],["revisionID","jon.wetzel@asu.edu"+date.getTime()],
-                                  ["user","jon.wetzel@asu.edu"],["restart","on"],
+                                  ["section","PAL3-regression-testing"],["revisionID","jon.wetzel@asu.edu"+date.getTime()],
+                                  /*["user","jon.wetzel@asu.edu"],*/["restart","on"],
                                   ["logging","true"],["topic","Diode Action"]]);
     }));
 
@@ -84,18 +84,31 @@ describe("Coached mode with correct diode resistor 2", function() {
             dtest.setNodeInitialValue(client, 0.7);
             dtest.setNodeUnits(client, "volts");
             dtest.nodeEditorDone(client);
-            //dtest.popupWindowPressOk(client);
-        }));        
-
+        }));
+    });
+    describe("Check the score",function(){
+        it("Should have some score text", async(function(){
+            atest.checkSuccessFactor("Overall",1,dtest,client);
+            atest.checkSuccessFactor("diode_behavior-forward",1,dtest,client);
+            atest.checkSuccessFactor("diode_behavior-reverse",1,dtest,client);
+            atest.checkSuccessFactor("resistor_behavior",1,dtest,client);
+            atest.checkSuccessFactor("kirchoff_voltage_law",1,dtest,client);
+            atest.checkSuccessFactor("ohms_law",1,dtest,client);
+            atest.checkSuccessFactor("zener_diode_behavior-reverse",1,dtest,client);
+            atest.checkSuccessFactor("PAL3",1,dtest,client);
+        }));
+        it("Should close the score alert", async(function(){
+            dtest.alertAccept(client);
+        }));
     });
 
     describe("Checking node colors", function(){
         it("Nodes should have correct border and fill colors", async(function(){
             //Defines which nodes to check
-            var nodesToCheck = ["I around loop", "V across R1", "R or R1", 
+            var nodesToCheck = ["I around loop", "V across R1", "R of R1", 
                                 "V across D1", "V across D1 when open", "Knee voltage"];
             //Does test for all nodes
-            nodesToCheck.forEach(function(element){
+            nodesToCheck.forEach(function(element){                
                 //Gets values
                 var nodeBorderColor = dtest.getNodeBorderColor(client, element);
                 var nodeBorderStyle = dtest.getNodeBorderStyle(client, element);

@@ -12,7 +12,7 @@
             "isGraphHelpShown": true
         },
         "image": {
-            "URL": "http://i.imgur.com/dNNguAS.png"
+            "URL": "images/PAL3/resistor-inductor.png"
         },
         "taskDescription": {
             "construction": [
@@ -50,7 +50,19 @@
                     "equation": 0,
                     "assistanceScore": 0
                 },
-                "status": {
+                "status": {},
+                "name": "Current",
+                "genus": "required",
+                "description": "Current thru inductor and resistor from left to right",
+                "type": "accumulator",
+                "initial": 0,
+                "units": "amps",
+                "equation": "id2",
+                "parentNode": true,
+                "imageMarks": [
+                    "110 , 27 , 72 , 26"
+                ],
+                "authorStatus": {
                     "root": {
                         "disabled": false
                     },
@@ -80,18 +92,7 @@
                     "inputs": {
                         "disabled": false
                     }
-                },
-                "name": "Current",
-                "genus": "required",
-                "description": "Current thru inductor and resistor from left to right",
-                "type": "accumulator",
-                "initial": 0,
-                "units": "amps",
-                "equation": "id2",
-                "parentNode": true,
-                "imageMarks": [
-                    "272 , 59 , 17 , 23"
-                ]
+                }
             },
             {
                 "ID": "id2",
@@ -117,37 +118,7 @@
                     "equation": 0,
                     "assistanceScore": 0
                 },
-                "status": {
-                    "root": {
-                        "disabled": false
-                    },
-                    "name": {
-                        "status": "entered"
-                    },
-                    "kind": {
-                        "status": "entered"
-                    },
-                    "description": {
-                        "status": "entered"
-                    },
-                    "units": {
-                        "status": "entered"
-                    },
-                    "equation": {
-                        "status": "entered",
-                        "disabled": false
-                    },
-                    "type": {
-                        "status": "entered"
-                    },
-                    "initial": {
-                        "disabled": true,
-                        "status": ""
-                    },
-                    "inputs": {
-                        "disabled": false
-                    }
-                },
+                "status": {},
                 "name": "Change in current",
                 "genus": "required",
                 "description": "change in inductor-resistor current",
@@ -182,37 +153,7 @@
                     "equation": 0,
                     "assistanceScore": 0
                 },
-                "status": {
-                    "root": {
-                        "disabled": false
-                    },
-                    "name": {
-                        "status": "entered"
-                    },
-                    "kind": {
-                        "status": "entered"
-                    },
-                    "description": {
-                        "status": "entered"
-                    },
-                    "units": {
-                        "status": "entered"
-                    },
-                    "equation": {
-                        "status": "entered",
-                        "disabled": false
-                    },
-                    "type": {
-                        "status": "entered"
-                    },
-                    "initial": {
-                        "disabled": true,
-                        "status": ""
-                    },
-                    "inputs": {
-                        "disabled": false
-                    }
-                },
+                "status": {},
                 "name": "V across inductor",
                 "description": "Voltage across inductor from left to right",
                 "genus": "required",
@@ -238,38 +179,7 @@
                     "equation": 0,
                     "assistanceScore": 0
                 },
-                "status": {
-                    "root": {
-                        "disabled": true
-                    },
-                    "name": {
-                        "status": "entered"
-                    },
-                    "kind": {
-                        "status": "entered"
-                    },
-                    "description": {
-                        "status": "entered"
-                    },
-                    "units": {
-                        "status": "entered"
-                    },
-                    "initial": {
-                        "status": "entered",
-                        "disabled": false
-                    },
-                    "type": {
-                        "status": "entered"
-                    },
-                    "inputs": {
-                        "disabled": true,
-                        "status": ""
-                    },
-                    "equation": {
-                        "disabled": true,
-                        "status": ""
-                    }
-                },
+                "status": {},
                 "name": "L of inductor",
                 "description": "Inductance of inductor",
                 "genus": "required",
@@ -301,7 +211,18 @@
                     "equation": 0,
                     "assistanceScore": 1
                 },
-                "status": {
+                "status": {},
+                "name": "Source voltage",
+                "description": "Voltage of battery switch combo",
+                "genus": "required",
+                "type": "function",
+                "units": "volts",
+                "equation": "id8*pulsetrain((0,50),50)",
+                "imageMarks": [
+                    "216 , 141 , 68 , 93",
+                    "145 , 191 , -145 , -69"
+                ],
+                "authorStatus": {
                     "root": {
                         "disabled": false
                     },
@@ -331,18 +252,7 @@
                     "inputs": {
                         "disabled": false
                     }
-                },
-                "name": "Source voltage",
-                "description": "Voltage of battery switch combo",
-                "genus": "required",
-                "type": "function",
-                "units": "volts",
-                "equation": "id8*pulsetrain((0,50),50)",
-                "imageMarks": [
-                    "182 , 149 , 69 , 108",
-                    "252 , 255 , -65 , -89",
-                    "0 , 127 , 120 , 71"
-                ]
+                }
             },
             {
                 "ID": "id6",
@@ -368,37 +278,7 @@
                     "equation": 0,
                     "assistanceScore": 0
                 },
-                "status": {
-                    "root": {
-                        "disabled": false
-                    },
-                    "name": {
-                        "status": "entered"
-                    },
-                    "kind": {
-                        "status": "entered"
-                    },
-                    "description": {
-                        "status": "entered"
-                    },
-                    "units": {
-                        "status": "entered"
-                    },
-                    "equation": {
-                        "status": "entered",
-                        "disabled": false
-                    },
-                    "type": {
-                        "status": "entered"
-                    },
-                    "initial": {
-                        "disabled": true,
-                        "status": ""
-                    },
-                    "inputs": {
-                        "disabled": false
-                    }
-                },
+                "status": {},
                 "name": "V across resistor",
                 "genus": "required",
                 "description": "Voltage across resistor",
@@ -424,38 +304,7 @@
                     "equation": 0,
                     "assistanceScore": 0
                 },
-                "status": {
-                    "root": {
-                        "disabled": true
-                    },
-                    "name": {
-                        "status": "entered"
-                    },
-                    "kind": {
-                        "status": "entered"
-                    },
-                    "description": {
-                        "status": "entered"
-                    },
-                    "units": {
-                        "status": "entered"
-                    },
-                    "initial": {
-                        "status": "entered",
-                        "disabled": false
-                    },
-                    "type": {
-                        "status": "entered"
-                    },
-                    "inputs": {
-                        "disabled": true,
-                        "status": ""
-                    },
-                    "equation": {
-                        "disabled": true,
-                        "status": ""
-                    }
-                },
+                "status": {},
                 "name": "R of resistor",
                 "description": "Resistance of resistor",
                 "genus": "required",
@@ -483,7 +332,19 @@
                     "equation": 0,
                     "assistanceScore": 1
                 },
-                "status": {
+                "status": {},
+                "name": "battery voltage",
+                "description": "Battery voltage (Vo in the figure)",
+                "equation": "",
+                "type": "parameter",
+                "parentNode": false,
+                "initial": 5,
+                "units": "volts",
+                "genus": "required",
+                "imageMarks": [
+                    "215 , 139 , 71 , 94"
+                ],
+                "authorStatus": {
                     "root": {
                         "disabled": true
                     },
@@ -514,18 +375,7 @@
                         "disabled": true,
                         "status": ""
                     }
-                },
-                "name": "battery voltage",
-                "description": "Battery voltage (Vo in the figure)",
-                "equation": "",
-                "type": "parameter",
-                "parentNode": false,
-                "initial": 5,
-                "units": "volts",
-                "genus": "required",
-                "imageMarks": [
-                    "252 , 255 , -65 , -89"
-                ]
+                }
             }
         ],
         "studentModelNodes": [
