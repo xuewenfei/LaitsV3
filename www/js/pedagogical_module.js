@@ -98,6 +98,41 @@ define([
 		]
 	};
 
+	var nodeEditorHints = {
+		description: "The quantity computed by the node ",
+		type: "Each quantity has a type.  To illustrate, suppose you are defining a quantity called zorch: <br>"+
+		"<ul><li>A Parameter is a quantity whose value is given to you.  If zorch=50.3, then it is a parameter.</li>"+
+		"<li> A Function is a quantity whose value is a function of the node’s inputs.<br>"+
+		"If zorch=foo*baz, then it is a Function and its inputs are foo and baz.  * means multiplication.</li>"+
+		"<li>An Accumulator is a quantity whose next value is the sum of its current value and its inputs.<br>" +
+		"If the next value of zorch is its current value + foo – baz, then it is an Accumulator and its " +
+		"<br>inputs are foo and baz.</li></ul>",
+		initial:"This is a number, typically given to you in the system description.",
+		units:"Some quantities are measured in units, such as feet, volts or dollars.<br>  Pick one here, or “No Units” if this quantity doesn’t need units.",
+		equation:"Determines the value of the quantity. Additional math functions are available in the help menu",
+		inputs:"Select a quantity to enter into the expression above.  Much faster than typing.",
+		operations: "Click one of these to enter it in the expression above. <br> See the Help menu at the top of the screen for a list of other mathematical operators and functions that you can type in.",
+		done: "Click Done to save this node and close the editor"
+	};
+
+	var hint1Messages = {
+		description: "Select <authorsValue>",
+		type: "Select <authorsValue>",
+		initial: "Type <authorsValue> and click/tap just outside the box when done.",
+		units: "Select <authorsValue>",
+		equation: "Complete the expression. Enter <authorsValue> in the box using the controls below (or by typing it in).<br/><br/>On completion click <strong>Check Expression</strong> to validate.",
+		done: ""
+	};
+
+	var hint2Messages = {
+		description: "Select the quantity",
+		type: "Select the type for this node",
+		initial: "Type in the value and click/tap just outside the box when done.",
+		units: "Select the units for this quantity",
+		equation: "Complete the expression using the controls below (or by typing it in).<br/><br/>On completion click <strong>Check Expression</strong> to validate.",
+		done: ""
+	};
+
 	var descriptionTable = {
 		// Summary: This table is used for determining the proper response to a student's 'description' answer (see 
 		//		'Pedagogical_Module.docx' in the documentation)
@@ -302,23 +337,28 @@ define([
 			COACHED: function(obj, part){
 				state(obj, part, "correct");
 				message(obj, part, "correct");
+				display(obj, "displayRemaining", true);
 				disable(obj, part, true);
 				disable(obj, "enableNext", false);
 			},
 			feedback: function(obj, part){
 				state(obj, part, "correct");
 				message(obj, part, "correct");
+				display(obj, "displayRemaining", true);
 				disable(obj, part, true);
 				disable(obj, "enableRemaining", false);
 			},
 			power: function(obj, part){
+				display(obj, "displayRemaining", true);
 				disable(obj, "enableRemaining", false);
 			},
 			TEST: function(obj, part){
+				display(obj, "displayRemaining", true);
 				state(obj, part, "correct");
 				disable(obj, "enableRemaining", false);
 			},
 			EDITOR: function(obj, part){
+				display(obj, "displayRemaining", true);
 				state(obj, part, "correct");
 				disable(obj, "enableRemaining", false);
 			}
@@ -330,17 +370,22 @@ define([
 			},
 			feedback: function(obj, part){
 				state(obj, part, "incorrect");
+				display(obj, "displayRemaining", true);
 				message(obj, part, "incorrect");
+				disable(obj, "enableNext", false);
 			},
 			power: function(obj, part){
+				display(obj, "displayRemaining", true);
 				disable(obj, "enableRemaining", false);
 			},
 			TEST: function(obj, part){
 				state(obj, part, "incorrect");
+				display(obj, "displayRemaining", true);
 				disable(obj, "enableRemaining", false);
 			},
 			EDITOR: function(obj, part){
 				state(obj, part, "incorrect");
+				display(obj, "displayRemaining", true);
 				disable(obj, "enableRemaining", false);
 			}
 		},
@@ -348,24 +393,29 @@ define([
 			COACHED: function(obj, part){
 				state(obj, part, "demo");
 				message(obj, part, "lastFailure2");
+				display(obj, "displayRemaining", true);
 				disable(obj, part, true);
 				disable(obj, "enableNext", false);
 			},
 			feedback: function(obj, part){
 				state(obj, part, "demo");
 				message(obj, part, "lastFailure2");
+				display(obj, "displayRemaining", true);
 				disable(obj, part, true);
 				disable(obj, "enableRemaining", false);
 			},
 			power: function(obj, part){
+				display(obj, "displayRemaining", true);
 				disable(obj, "enableRemaining", false);
 			},
 			TEST: function(obj, part){
 				state(obj, part, "incorrect");
+				display(obj, "displayRemaining", true);
 				disable(obj, "enableRemaining", false);
 			},
 			EDITOR: function(obj, part){
 				state(obj, part, "incorrect");
+				display(obj, "displayRemaining", true);
 				disable(obj, "enableRemaining", false);
 			}
 		},
@@ -377,22 +427,27 @@ define([
 				console.error("Attempting to access actionTable after demo has been sent.");
 			},
 			power: function(obj, part){
+				display(obj, "displayRemaining", true);
 				disable(obj, "enableRemaining", false);
 			},
 			TEST: function(obj, part){
+				display(obj, "displayRemaining", true);
 				disable(obj, "enableRemaining", false);
 			},
 			EDITOR: function(obj, part){
+				display(obj, "displayRemaining", true);
 				disable(obj, "enableRemaining", false);
 			}
 		},
 		incorrect: {
 			TEST: function(obj, part){
 				state(obj, part, "incorrect");
+				display(obj, "displayRemaining", true);
 				disable(obj, "enableRemaining", false);
 			},
-			EDITOR: function(obj, part){	
+			EDITOR: function(obj, part){
 				state(obj, part, "incorrect");
+				display(obj, "displayRemaining", true);
 				disable(obj, "enableRemaining", false);
 			}
 		}
@@ -703,7 +758,7 @@ define([
 	var record = null;
 
 	/*****
-	 * Summary: The following four functions are used by the above tables to push 
+	 * Summary: The following four functions are used by the above tables to push
 	 *		statuses and messages to the return object array.
 	 *****/
 	function state(/*object*/ obj, /*string*/ nodePart, /*string*/ status){
@@ -712,7 +767,7 @@ define([
 			obj.push({id: nodePart, attribute: "value", value: ""});
 		}
 	}
-	
+
 	function message(/*object*/ obj, /*string*/ nodePart, /*string*/ status){
 		var hintSequence = hints[status];
 		if(record.getLocal(status) < hintSequence.length){
@@ -732,10 +787,14 @@ define([
 		obj.push({id: nodePart, attribute: "disabled", value: disable});
 	}
 
+	function display(/*object*/ obj, /*string*/ nodeDiv, /*string*/ display){
+		obj.push({id: nodeDiv, attribute: "display", value: display});
+	}
+
 	/*****
-	 * 
+	 *
 	 * Builds class that is used by controller to check student answers
-	 * 
+	 *
 	 *****/
 	return declare(null, {
 		constructor: function(/*string*/ mode, /*string*/ subMode, /*model.js object*/ model, /* Activity Config*/ activityConfig){
@@ -743,6 +802,12 @@ define([
 			this.mode = mode;
 			this.activityConfig = activityConfig;
 			this.showCorrectAnswer = this.activityConfig.get("showCorrectAnswer");
+			/*
+			* enableNextFromAuthor is used in the case when the answer is incorrect, but we want to enable the next field
+			* as per the wrong answer in student mode. See trello card https://trello.com/c/EjN4UBDU.
+			* It should always be kept true, and only in case of firstfailure in case of a type it should be changed to false.
+			*/
+			this.enableNextFromAuthor = true;
 			this.setUserType(subMode);
 		},
 		matchingID: null,
@@ -751,7 +816,7 @@ define([
 		_assessment: null,
 		nodeOrder: [],
 		nodeCounter: 0,
-	
+
 		/*****
 		 * Private Functions
 		 *****/
@@ -761,61 +826,95 @@ define([
 			//
 			// Tags: Private
 			var nodeType = "";
-			if(this.showCorrectAnswer){ //For Other modes get node type from given model
-				nodeType = this.model.given.getType(givenNodeID); 
+			var postTypeProperties = ["initial", "units", "equation"];
+			if(this.showCorrectAnswer && this.enableNextFromAuthor && (postTypeProperties.indexOf(currentPart) == -1)){ //For Other modes get node type from given model
+				nodeType = this.model.given.getType(givenNodeID);
 			}else{  //For EDITOR and TEST get node type from user selected answer
 				nodeType = this.model.student.getType(this.model.student.getNodeIDFor(givenNodeID));
 			}
 			var newPart = "equation";
 
 			switch(currentPart){
-			case "type":
-				if(nodeType === "parameter" || nodeType === "accumulator"){
-					disable(obj, "initial", false);
-					newPart = "initial";
-				}else if(nodeType === "function"){
-					disable(obj, "initial", true);
-						
-					if(this.model.given.getUnits(givenNodeID)){
+				case "type":
+					if(nodeType === "parameter" || nodeType === "accumulator"){
+						disable(obj, "initial", false);
+						newPart = "initial";
+					}else if(nodeType === "function"){
+						disable(obj, "initial", true);
+
+						if(this.model.given.getUnits(givenNodeID)){
+							disable(obj, "units", false);
+							newPart = "units";
+						}else{
+							disable(obj, "equation", false);
+							newPart = "equation";
+						}
+					}
+					break;
+				case "initial":
+					if(this.model.given.getUnits(givenNodeID) && this.model.student.getUnits(this.model.student.getNodeIDFor(givenNodeID)) != this.model.given.getUnits(givenNodeID)){
 						disable(obj, "units", false);
 						newPart = "units";
-					}else{
-						disable(obj, "equation", false);
+					}else if(nodeType === "function" || nodeType === "accumulator"){
+						var dat = dom.byId("equationBox").value;
+						if(dat=="") {
+							disable(obj, "equation", false);
+						}
+						newPart = "equation";
+					}else if(nodeType === "parameter"){
+						disable(obj, "equation", true);
 						newPart = "equation";
 					}
-				}
-				break;
-			case "initial":
-				if(this.model.given.getUnits(givenNodeID) && this.model.student.getUnits(this.model.student.getNodeIDFor(givenNodeID)) != this.model.given.getUnits(givenNodeID)){
-					disable(obj, "units", false);
-					newPart = "units";
-				}else if(nodeType === "function" || nodeType === "accumulator"){
-					var dat = dom.byId("equationBox").value;
-					if(dat=="") {
-						disable(obj, "equation", false);
+					break;
+				case "units":
+					if(nodeType === "parameter"){
+						disable(obj, "equation", true);
+					}else if(nodeType === "function" || nodeType === "accumulator"){
+						var dat = dom.byId("equationBox").value;
+						if(dat==""){
+							disable(obj, "equation", false);
+						}
 					}
 					newPart = "equation";
-				}else if(nodeType === "parameter"){
-					disable(obj, "equation", true);
-					newPart = "equation";
-				}
-				break;
-			case "units":
-				if(nodeType === "parameter"){
-					disable(obj, "equation", true);
-				}else if(nodeType === "function" || nodeType === "accumulator"){
-					var dat = dom.byId("equationBox").value;
-					if(dat==""){
-						disable(obj, "equation", false);
-					}
-				}
-				newPart = "equation";
-				break;
+					break;
 			}
 			if(job === "enableRemaining" && newPart !== "equation"){
 				this._enableNext(obj, givenNodeID, newPart, job);
 			}else{
 				return;
+			}
+		},
+
+		/*
+		* From January 2016, the node only shows description and type in the node
+		* This function displays the rest of the node values based after the type is correctly chosen or demoed
+		*/
+		_display: function(/*object*/ obj, /*string*/ nodeID, /*string*/ type){
+			var givenID = this.model.student.getDescriptionID(nodeID);
+			var units = this.model.given.getUnits(givenID);
+
+			switch(type){
+				case "parameter":
+					display(obj, "initial", "inline");
+					display(obj, "equation", "none");
+					if(units){
+						display(obj, "units", "inline");
+					}
+					break;
+				case "function":
+					display(obj, "initial", "none");
+					display(obj, "equation", "block");
+					if(units){
+						display(obj, "units", "inline");
+					}
+					break;
+				case "accumulator":
+					display(obj, "initial", "inline");
+					display(obj, "equation", "block");
+					if(units){
+						display(obj, "units", "inline");
+					}
+					break;
 			}
 		},
 
@@ -844,7 +943,7 @@ define([
 							interpretation = "firstFailure";
 					}
 					else{
-							interpretation = "firstFailure";
+						interpretation = "firstFailure";
 					}
 				}
 			};
@@ -856,18 +955,18 @@ define([
 
 					if(this.model.given.getGenus(answer) && (this.model.given.getGenus(answer) != "required" && this.model.given.getGenus(answer) != "allowed")){
 						/*array.forEach(this.model.given.getNodes(), function(extra){
-							if(answer === extra.ID && extra.genus){
-								interpretation = extra.genus;
-							}
-						});*/
+						 if(answer === extra.ID && extra.genus){
+						 interpretation = extra.genus;
+						 }
+						 });*/
 						/**
-						/* we have already eliminated the correct cases of required and allowed so other three can be given to the interpretation as is.
-						/* this is what is being done in the above loop as well. If there is any issue then we can remove this line.
-						/* and un comment the above loop
-						**/
+						 /* we have already eliminated the correct cases of required and allowed so other three can be given to the interpretation as is.
+						 /* this is what is being done in the above loop as well. If there is any issue then we can remove this line.
+						 /* and un comment the above loop
+						 **/
 						interpretation = this.model.given.getGenus(answer);
 					}else if(this.model.isNodeVisible(studentID, answer)){
-							interpretation = "redundant";
+						interpretation = "redundant";
 					}else if(this.model.isParentNode(answer) || (this.model.isNodesParentVisible(studentID, answer) && !this.checkPremature(studentID))){
 						interpretation = "optimal";
 					}else if(this.model.student.getNodes().length === 0){
@@ -917,15 +1016,15 @@ define([
 			 */
 			return interpretation;
 		},
-		
+
 		/*****
 		 * Public Functions
 		 *****/
-	
+
 		setState: function(/*state.js object*/ State){
 			record = State;
 			for(var hint in hints){
-			record.init(hint, 0);
+				record.init(hint, 0);
 			};
 			record.init("problemCompleted", 0);
 		},
@@ -933,7 +1032,31 @@ define([
 		setAssessment: function(/* object */ assess){
 			this._assessment = assess;
 		},
-		
+
+		getActionForType: function(id, answer){
+			/*
+			* This function gives node properties to be shown as per the values
+			* entered by the user for the node.
+			* This is called when the user reopens a node.
+			*/
+			var nodePart = "type";
+			var interpretation = this._getInterpretation(id, nodePart, answer);
+			var obj = [];
+			var returnObj = [];
+			if(nodePart == "type"){
+				nodeEditorActionTable[interpretation][this.userType](obj, nodePart);
+			}
+
+			for(var i = 0; i < obj.length; i++){
+				if(obj[i].id == "displayRemaining"){
+					this._display(returnObj, id, answer);
+					break;
+				}
+			}
+
+			return returnObj;
+		},
+
 		processAnswer: function(/*string*/ id, /*string*/ nodePart, /*string | object*/ answer,/*string*/ answerString){
 			// Summary: Pocesses a student's answers and returns if correct, 
 			//		incorrect, etc. and alerts the controller about what parts 
@@ -963,9 +1086,9 @@ define([
 				}else{
 					//do not need this as getCorrectAnswer gives the correct answer for execution activity
 					/*if(this.activityConfig.get("executionExercise")){
-						var itr = this.model.student.getIteration();
-						answer = answer[itr];
-					}*/
+					 var itr = this.model.student.getIteration();
+					 answer = answer[itr];
+					 }*/
 					returnObj.push({id: nodePart, attribute: "value", value: answer});
 					solutionGiven = true;
 				}
@@ -1041,12 +1164,12 @@ define([
 							if(typeof content !== "undefined" && content!=="" && this.mode !== "AUTHOR")
 								returnObj.push({id: "explanation", attribute: "disabled", value: false});
 						}
-				
-					}	
+
+					}
 
 				}
-			// Process answers for all other node types
-			//console.log("flag3",returnObj);
+				// Process answers for all other node types
+				//console.log("flag3",returnObj);
 			}else{
 				givenID = this.model.student.getDescriptionID(id);
 				if(this.activityConfig.get("showNodeEditor")) {
@@ -1084,11 +1207,25 @@ define([
 				// Activate appropriate parts of the node editor
 				var lastElement = returnObj[returnObj.length - 1].id;
 				if (lastElement === "enableNext" || lastElement === "enableRemaining") {
+					if(interpretation == "firstFailure"){
+						this.enableNextFromAuthor = false;
+					}
 					returnObj.pop();
 					this._enableNext(returnObj, givenID, nodePart, lastElement);
+					this.enableNextFromAuthor = true;
+				}
+				if(nodePart == "type"){
+					for(var i = 0; i < returnObj.length; i++){
+						if(returnObj[i].id == "displayRemaining"){
+							var tempAnswer = this.model.given.getStatus(givenID, nodePart) == "demo" ? this.model.given.getType(givenID) : answer;
+							returnObj.splice(i, 1);
+							this._display(returnObj, id, tempAnswer);
+							break;
+						}
+					}
 				}
 			}
-			
+
 			//logging pm response
 			var logObj = null;
 			var checkStatus;
@@ -1119,7 +1256,7 @@ define([
 				solutionProvided: solutionGiven
 			}, logObj);
 			this.logging.log('solution-step', logObj);
-			
+
 			if(this._assessment && this._assessment.currentNodeTime){
 				this._assessment.updateError(id, nodePart, checkStatus);
 			}
@@ -1165,14 +1302,24 @@ define([
 			return directives;
 		},
 
+		newActionVisibility: function(){
+			var divs = ["initial", "units", "equation"];
+			divDirectives = array.map(divs, function(div){
+				return {id: div, attribute: "display", value: "none"};
+			});
+
+			return divDirectives;
+		},
+
+
 		checkDoneness: function(model){
 			if(this.mode == "COACHED" && model.areRequiredNodesVisible()){
-			return [{
-				id: "crisisAlert",
-				attribute: "open",
-				value: "You have already created all the necessary nodes. You might want to click on \"Graph\" or \"Table\""
-			}];
-			} 
+				return [{
+					id: "crisisAlert",
+					attribute: "open",
+					value: "You have already created all the necessary nodes. You might want to click on \"Graph\" or \"Table\""
+				}];
+			}
 			return false;
 		},
 
@@ -1191,9 +1338,9 @@ define([
 					// Number of problems to show the hint upon completion
 					if(record.getLocal("problemCompleted") < 3 ){
 						return	[{
-						id: "crisisAlert",
-						attribute: "open",
-						value: 'You have completed your model. Click on "Graph" or "Table" to see what the solution looks like'
+							id: "crisisAlert",
+							attribute: "open",
+							value: 'You have completed your model. Click on "Graph" or "Table" to see what the solution looks like'
 						}];
 					}
 				}
@@ -1401,6 +1548,184 @@ define([
 			}
 
 			return finalHierarchy;
+		},
+
+
+		//NODE EDITOR TOUR
+
+		generateTourSteps: function(/*String*/ givenNodeID, /*String*/ studentNodeID, /*Object*/ state) {
+
+			var steps = {};
+			var fields = [];
+			var elements = {
+				description: "descriptionQuestionMark",
+				type: "typeQuestionMark",
+				inputs: "inputsQuestionMark",
+				equation: "expressionBoxQuestionMark",
+				checkExpression: "equationDoneButton",
+				initial: "initialValueQuestionMark",
+				units: "unitsQuestionMark",
+				operations: "operationsQuestionMark",
+				done: "closeButton"
+			};
+
+			if(state) {
+				var studentNode = this.model.student.getNode(studentNodeID);
+				var showHints = (!state["parameter"] || state["parameter"] < 2) || (!state["accumulator"] || state["accumulator"] < 3) || (!state["function"] || state["function"] < 3);
+				var hintMessages = hint1Messages;
+
+				if (studentNode && showHints) {
+					var statusDirectives = studentNode.status;
+
+					//Get Description and Type for the node
+					var descAnswer = this.model.student.getCorrectAnswer(studentNodeID, "description");
+					var typeAnswer = this.model.given.getType(descAnswer);
+
+					//Description Hint
+					var field = "description";
+					if (!statusDirectives[field] || !statusDirectives[field].status || statusDirectives[field].status === "incorrect") {
+						//Get correct answer from given model
+						var answer = this.model.student.getCorrectAnswer(studentNodeID, field);
+						answer = this.model.given.getDescription(answer);
+						//Switch hint messages based on state
+						if (typeAnswer === "parameter" && (state[typeAnswer] && state[typeAnswer] >= 1)) {
+							hintMessages = hint2Messages;
+						}
+						else if (typeAnswer !== "parameter" && (state[typeAnswer] && state[typeAnswer] >= 2)) {
+							hintMessages = hint2Messages
+						}
+						//Generate Description tour step
+						var hintMessage = hintMessages[field].replace('<authorsValue>', '<strong>' + answer + '</strong>') || "";
+						var step = {
+							element: elements[field],
+							title: nodeEditorHints[field] + '<br/><br/>' + hintMessage
+						};
+						steps[field] = step;
+					}
+
+					// Get Node type from given model and switch hint messages if necessary
+					if (givenNodeID && !this.checkPremature(studentNodeID)) {
+						var type = this.model.given.getType(givenNodeID);
+						if (type === "parameter" && (state[type] && state[type] >= 1)) {
+							hintMessages = hint2Messages;
+						}
+						else if (type !== "parameter" && (state[type] && state[type] >= 2)) {
+							hintMessages = hint2Messages
+						}
+
+
+						//Type Hint
+						if (!statusDirectives["type"] || !statusDirectives["type"].status || statusDirectives["type"].status === "incorrect") {
+							field = "type";
+							answer = this.model.student.getCorrectAnswer(studentNodeID, field);
+							var count = (answer === "parameter") ? 2 : 3;
+							if (!state[answer] || state[answer] < count) {
+								var capitalize = answer.charAt(0).toUpperCase() + answer.slice(1);
+								hintMessage = hintMessages[field].replace('<authorsValue>', '<strong>' + capitalize + '</strong>') || "";
+								var typeStep = {
+									element: elements[field],
+									title: nodeEditorHints[field] + '<br/>' + hintMessage
+								};
+								steps[field] = typeStep;
+							}
+						}
+
+
+						if (type === "parameter") {
+							fields = ["initial", "units"];
+							if (studentNode && (!state["parameter"] || state["parameter"] < 2)) {
+								array.forEach(fields, lang.hitch(this, function (field, index) {
+									if (!statusDirectives[field] || !statusDirectives[field].status || statusDirectives[field].status === "incorrect") {
+										answer = this.model.student.getCorrectAnswer(studentNodeID, field);
+										if (answer) {
+											hintMessage = hintMessages[field].replace('<authorsValue>', '<strong>' + answer + '</strong>') || "";
+											var step = {
+												element: elements[field],
+												title: nodeEditorHints[field] + '<br/><br/>' + hintMessage
+											};
+											steps[field] = step;
+										}
+									}
+								}));
+							}
+						}
+						else if (type === "function") {
+							fields = ["units", "equation"];
+							if (studentNode && (!state["function"] || state["function"] < 3)) {
+								array.forEach(fields, lang.hitch(this, function (field, index) {
+									if (!statusDirectives[field] || !statusDirectives[field].status || statusDirectives[field].status === "incorrect") {
+										answer = this.model.student.getCorrectAnswer(studentNodeID, field);
+										if (field === "equation") {
+											answer = check.convert(this.model.given, answer);
+										}
+										if (answer) {
+											hintMessage = hintMessages[field].replace('<authorsValue>', '<strong>' + answer + '</strong>') || "";
+											var step = {
+												element: elements[field],
+												title: nodeEditorHints[field] + '<br/><br/>' + hintMessage
+											};
+											steps[field] = step;
+										}
+									}
+								}));
+							}
+						}
+						else if (type === "accumulator") {
+							fields = ["initial", "units", "equation"];
+							if (studentNode && (!state["accumulator"] || state["accumulator"] < 3)) {
+								array.forEach(fields, lang.hitch(this, function (field, index) {
+									if (!statusDirectives[field] || !statusDirectives[field].status || statusDirectives[field].status === "incorrect") {
+										answer = this.model.student.getCorrectAnswer(studentNodeID, field);
+										if (field === "equation") {
+											answer = check.convert(this.model.given, answer);
+										}
+										if (answer) {
+											hintMessage = hintMessages[field].replace('<authorsValue>', '<strong>' + answer + '</strong>') || "";
+											var step = {
+												element: elements[field],
+												title: nodeEditorHints[field] + '<br/><br/>' + hintMessage
+											};
+
+											steps[field] = step;
+										}
+									}
+								}));
+							}
+						}
+					}
+
+					//Add tooltip for Done
+					if (type && Object.keys(steps).length > 0) {
+						field = "done";
+						var step = {
+							element: elements[field],
+							title: nodeEditorHints[field]
+						};
+						steps[field] = step;
+					} else {
+						steps["default"] = "default";
+					}
+				}
+			}
+			//add default hints for other fields
+			var allFields = Object.keys(elements);
+			array.forEach(allFields, lang.hitch(this, function(val, index){
+				if(!steps[val] && val !== "done"){
+					steps[val] = {
+						element: elements[val],
+						title: nodeEditorHints[val],
+						type: "default"
+					};
+				}
+			}));
+
+			//copy from object to array
+			var stepsArr = [];
+			for(s in steps){
+				stepsArr.push(steps[s]);
+			}
+
+			return stepsArr;
 		}
 	});
 });

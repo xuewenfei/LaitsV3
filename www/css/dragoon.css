@@ -39,8 +39,18 @@ html, body, #main{
   max-width: 60ex;
   text-align: center;
 }
+/* Common Float classes */
+.fLeft{
+    float: left;
+} 
 
+.fRight{
+    float: right;
+}
 
+.cBoth{
+    clear: both;
+}
 
 /*
                         Node Editor and Description Editor
@@ -84,10 +94,16 @@ html, body, #main{
 }
 
 .questionMark{
-    width:21px;
-    margin: -4px;
+    width: 22px;
+    height: 22px;
+    margin: -6px -3px -6px 2px;
+    display: inline-block;
+    background-image: url(../images/help-inactive.png);
+    background-size: cover;
 }
-
+.questionMark.active{
+    background-image: url(../images/help-active.png);
+}
 .sameedit #equationText {
     max-width:40ex;
     border:solid black 1px;
@@ -129,7 +145,7 @@ html, body, #main{
     width:120px;
 }
 .sameedit .fieldgroup > span.fixedwidth {
-    width: 14ex;
+    width: 14.3ex;
     margin-right:3px;
 }
 /* Right align buttons */
@@ -420,7 +436,7 @@ span.slip{
 }
 
 .crisisDialog{
-    z-index:2000 !important;
+    z-index:5000 !important;
 }
 
 .executionContent{
@@ -576,4 +592,18 @@ span.slip{
 
 .suggestionsItem.selected , .suggestionsItem:hover{
     background-color: #abd6ff;
+}
+
+.zoomImage{
+	height: 24px;
+}
+
+.zoomButtons{
+	display: none;
+	float: right;
+}
+
+/*Fix for tooltips to appear below  the dialogboxes */
+.dijitTooltipDialogPopup {
+    z-index: 700 !important;
 }

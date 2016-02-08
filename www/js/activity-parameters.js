@@ -53,6 +53,7 @@ define([
 					allowSliders: true,
 
 					promptSaveAs:true,
+					allowZoom: true,
                     "allowAssignWaveFormButton": "true",
                     showWaveformEditor : true
                 },
@@ -72,6 +73,7 @@ define([
 					showFeedback: true,
 					showCorrectAnswer:true,
 					showEquationAutoComplete: true,
+					allowZoom: true,
 					enable:[
 					],
 
@@ -83,7 +85,9 @@ define([
 						"units",
 						"equation"
 					],
-					plotAuthorSolution:true
+					plotAuthorSolution:true,
+					showNodeEditorTour: false,
+					showNodeBorderTutorial: true
 				},
 
 				COACHED:{
@@ -102,6 +106,7 @@ define([
 					showCorrectAnswer:true,
 					showEquationAutoComplete: true,
 					targetNodeStrategy:true,
+					allowZoom: true,
 
 					enable:[
 					],
@@ -113,7 +118,9 @@ define([
 						"units",
 						"equation"
 					],
-					plotAuthorSolution:true
+					plotAuthorSolution:true,
+					showNodeEditorTour: true,
+					showNodeBorderTutorial: true
 				},
 
 				TEST:{
@@ -127,6 +134,7 @@ define([
 					allowDeleteNode: true,
 					allowEditNode: true,
 					showEquationAutoComplete: true,
+					allowZoom: true,
 					enable:[
 					],
 
@@ -152,6 +160,7 @@ define([
 					allowDeleteNode: true,
 					allowEditNode: true,
 					showEquationAutoComplete: true,
+					allowZoom: true,
 					enable:[
 					],
 					properties: [
@@ -180,6 +189,7 @@ define([
 
 					initializeStudentModel : true,
 					resetAssistanceScore : true,
+					allowZoom: true,
 					copyFields: [
 						"description",
 						"type",
@@ -206,6 +216,7 @@ define([
 					allowLessonsLearned:true,
 
 					allowEditNode:true,
+					allowZoom: true,
 
 					showHints: true,
 					showFeedback: true,
@@ -239,6 +250,7 @@ define([
 					allowLessonsLearned:true,
 
 					allowEditNode:true,
+					allowZoom: true,
 
 					initializeStudentModel : true,
 					resetAssistanceScore : true,
@@ -268,6 +280,7 @@ define([
 					allowLessonsLearned:true,
 
 					allowEditNode:true,
+					allowZoom: true,
 					showFeedback: true,
 
 					initializeStudentModel : true,
@@ -300,6 +313,7 @@ define([
 					allowLessonsLearned:true,
 
 					allowEditNode:true,
+					allowZoom: true,
 
 					showHints: true,
 					showFeedback: true,
@@ -337,6 +351,7 @@ define([
 					allowLessonsLearned:true,
 
 					allowEditNode:true,
+					allowZoom: true,
 
 					showHints: true,
 					showFeedback: true,
@@ -374,6 +389,7 @@ define([
 					allowLessonsLearned:true,
 
 					allowEditNode:true,
+					allowZoom: true,
 					initializeStudentModel : true,
 					resetAssistanceScore : true,
 					copyFields: [
@@ -406,6 +422,7 @@ define([
 					allowLessonsLearned:true,
 
 					allowEditNode:true,
+					allowZoom: true,
 					showFeedback: true,
 
 					initializeStudentModel : true,
@@ -441,6 +458,7 @@ define([
 					allowLessonsLearned:true,
 
 					allowEditNode:true,
+					allowZoom: true,
 
 					showHints: true,
 					showFeedback: true,
@@ -477,6 +495,7 @@ define([
 					allowLessonsLearned:true,
 
 					allowEditNode:true,
+					allowZoom: true,
 
 					showHints: true,
 					showFeedback: true,
@@ -513,6 +532,7 @@ define([
 					allowLessonsLearned:true,
 
 					allowEditNode:true,
+					allowZoom: true,
 					copyFields: [
 						"description",
 						"type",
@@ -544,6 +564,7 @@ define([
 					allowLessonsLearned:true,
 
 					allowEditNode:true,
+					allowZoom: true,
 					showFeedback: true,
 					copyFields: [
 						"description",
@@ -579,6 +600,7 @@ define([
 					allowLessonsLearned:true,
 
 					allowEditNode:true,
+					allowZoom: true,
 
 					showHints: true,
 					showFeedback: true,
@@ -612,6 +634,7 @@ define([
 					allowLessonsLearned:true,
 
 					allowEditNode:true,
+					allowZoom: true,
 
 					showHints: true,
 					showFeedback: true,
@@ -645,6 +668,7 @@ define([
 					allowLessonsLearned:true,
 
 					allowEditNode:true,
+					allowZoom: true,
 					showFeedback: true,
 					copyFields: [
 						"description",
@@ -674,6 +698,7 @@ define([
 					allowLessonsLearned:true,
 
 					allowEditNode:true,
+					allowZoom: true,
 					showFeedback: true,
 					copyFields: [
 						"description",
@@ -708,6 +733,7 @@ define([
 					allowLessonsLearned:true,
 
 					allowEditNode:true,
+					allowZoom: true,
 
 					showHints: true,
 					showFeedback: true,
@@ -738,6 +764,7 @@ define([
 					allowLessonsLearned:true,
 
 					allowEditNode:true,
+					allowZoom: true,
 
 					showHints: true,
 					showFeedback: true,
@@ -769,6 +796,7 @@ define([
 					allowLessonsLearned:true,
 
 					allowEditNode:true,
+					allowZoom: true,
 					showFeedback: true,
 					copyFields: [
 						"description",
@@ -796,6 +824,7 @@ define([
 					allowLessonsLearned:true,
 
 					allowEditNode:true,
+					allowZoom: true,
 					showFeedback: true,
 					copyFields: [
 						"description",
@@ -841,6 +870,7 @@ define([
 				allowHelp: false,
 				allowLessonsLearned: false,
 				allowHistory : false,
+				allowZoom: false,
 				//Node
 				allowDeleteNode: false,
 				allowEditNode: false,
@@ -896,7 +926,11 @@ define([
                 executionExercise: false,
 
 				//Waveform Behavior
-				showWaveformEditor: false
+				showWaveformEditor: false,
+
+				//tour
+				showNodeEditorTour: false,
+				showNodeBorderTutorial: false
 
 			},
 

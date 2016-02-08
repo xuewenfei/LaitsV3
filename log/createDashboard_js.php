@@ -23,6 +23,7 @@
 
 	class Dashboard{
 		public $al;
+		public $removeUsers = array("dragoon", "avaneeshd", "bcmacnei", "acease", "jwauthor", "sachin");
 
 		function __construct($con){
 			$this->al = new AnalyzeLogs($con);
@@ -30,6 +31,7 @@
 
 		function createDashboard($section, $mode, $activity, $user, $problem, $fromTime, $fromDate, $toTime, $toDate){
 			$query = $this->getQuery($section, $mode, $activity, $user, $problem, $fromTime, $fromDate, $toTime, $toDate);
+			//echo $query;
 			$result = $this->al->getResults($query);
 			$objects = null;
 			if($result->num_rows != 0)
@@ -81,6 +83,16 @@
 			return $queryString;
 		}
 
+		function checkUser($n){
+			foreach($this->removeUsers as $u){
+				if(stripos($n, $u) !== false){
+					return true;
+				}
+			}
+			
+			return false;
+		}
+
 		function parseMessages($result){
 			$resetVariables = true;
 			$sessionTime; $outOfFocusTime; $timeWasted; $focustTime; $runningSessionTime; $runningOutOfFocusTime;
@@ -98,11 +110,19 @@
 			$currentSession;
 			$currentAction;
 			$first = true;
+			$stop = false;
+			$oldUser = "";
 			while($row = $result->fetch_assoc()){
 				if($first){
 					$oldRow = $row;
 					$first = false;
 				}
+				if(($stop && $oldUser == $row["user"]) || $this->checkUser($row["user"])){
+					$oldUser = $row["user"];
+					$stop = true;
+					continue;
+				}
+
 				if($resetVariables){
 					$sessionTime = 0; $outOfFocusTime = 0; $timeWasted=0; $focusTime = 0; $propertyStartTime = 0;
 					$runningSessionTime = 0; $runningOutOfFocusTime = 0;
@@ -464,7 +484,7 @@
 						$currentIndex = -1;
 
 						if($newMessage['property'] == "description"){
-							$newNode = $upObject->getNodeFromName($newMessage['node']);
+							$newNode = (array_key_exists('node', $newMessage)?($upObject->getNodeFromName($newMessage['node'])):null);
 							if($currentNode != null && count($currentNode->properties) >= 1){
 								//case when auto created. check if the currently autocreated node was not already deleted
 								$autoCreated = true;
@@ -492,7 +512,7 @@
 								$newNode->nodeExist = true;
 								$pushNodeBack = true;
 							} else if($currentNode != null){
-								$currentNode->name = $newMessage['node'];
+								$currentNode->name = (array_key_exists('node', $newMessage)?$newMessage['node']:"");
 							} else if($currentNode == null){
 								//because the description call is for none of the above cases which should mean that create node and open node messages were missing. so creating a current node.
 								$currentNode = new Node();
@@ -724,7 +744,8 @@
 					$upObject->totalSolutionChecks = $totalChecks;
 					$upObject->errorRatio = $errorRatio;
 					$upObject->slides = $slides;
-					array_push($objectArray, $upObject);
+					if($upObject->totalTime > 0)
+						array_push($objectArray, $upObject);
 				}
 				$oldRow = $row;
 				$oldMessage= $newMessage;
@@ -749,7 +770,8 @@
 			$upObject->totalSolutionChecks = $totalChecks;
 			$upObject->errorRatio = $errorRatio;
 			$upObject->slides = $slides;
-			array_push($objectArray, $upObject);
+			if($upObject->totalTime > 0)
+				array_push($objectArray, $upObject);
 			
 			return $objectArray;
 		}

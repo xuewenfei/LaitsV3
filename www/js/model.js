@@ -120,6 +120,12 @@ define([
             setGraphHelpShown: function(_isGraphHelpShown){
                 this.model.task.properties.isGraphHelpShown = _isGraphHelpShown;
             },
+			setNodeEditorTutorialState: function(nodeEditorTutorialState){
+				this.model.task.properties.nodeEditorTutorialState = nodeEditorTutorialState || {};
+			},
+			setNodeBorderTutorialState: function(nodeBorderTutorialState){
+				this.model.task.properties.nodeBorderTutorialState = nodeBorderTutorialState || {};
+			},
             updatePosition: function()
 			{
 				if((this.x + this.nodeWidth) < (document.documentElement.clientWidth - this.nodeWidth))
@@ -344,6 +350,12 @@ define([
                 console.log("model help",this.model.task.properties);
                 return (this.model.task.properties.isGraphHelpShown != undefined)?this.model.task.properties.isGraphHelpShown : false;
             },
+			getNodeEditorTutorialState : function(){
+				return (this.model.task.properties.nodeEditorTutorialState != undefined)?this.model.task.properties.nodeEditorTutorialState : {};
+			},
+			getNodeBorderTutorialState: function(){
+				return (this.model.task.properties.nodeBorderTutorialState != undefined)?this.model.task.properties.nodeBorderTutorialState : {};
+			},
 			getTime: function(){
 				// Summary: Returns the time object from the JSON model.
 				return this.model.task.time;
@@ -609,7 +621,6 @@ define([
 				if(!node["imageMarks"]) return [];
 				else return node["imageMarks"];
 			},
-           
 			getExecutionValue: function(/* string */ id, /* number */ index){
 				var currentItr = obj.student.getIteration();
 				var maxItr = obj.getExecutionIterations();

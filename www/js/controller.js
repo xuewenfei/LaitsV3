@@ -36,13 +36,15 @@ define([
 	"dijit/popup",
 	"dijit/registry",
 	"dijit/TooltipDialog",
+	"dijit/focus",
 	"./equation",
 	"./graph-objects",
 	"./typechecker",
 	"./forum",
 	"./autocomplete",
+	"./tour",
 	"./schemas-student"
-], function(array, declare, lang, aspect, dom, domClass, domConstruct, domStyle, keys, on, ready, popup, registry, TooltipDialog, expression, graphObjects, typechecker, forum, AutoComplete){
+], function(array, declare, lang, aspect, dom, domClass, domConstruct, domStyle, keys, on, ready, popup, registry, TooltipDialog, focusUtil, expression, graphObjects, typechecker, forum, AutoComplete, Tour){
 
 	/* Summary:
 	 *			Controller for the node editor, common to all modes
@@ -154,6 +156,11 @@ define([
 			equation: "equationBox",
 			explanation:"explanationButton"
 		},
+		genericDivMap: {
+			initial: "initialValueDiv",
+			units: "unitDiv",
+			equation: "expressionDiv"
+		},
 		// A list of all widgets.  (The constructor mixes this with controlMap)
 		widgetMap: {
 			message: 'messageBox',
@@ -209,7 +216,7 @@ define([
 		_setUpNodeEditor: function(){;
 			// get Node Editor widget from tree
 			this._nodeEditor = registry.byId('nodeeditor');
-
+			this._nodeEditor.set("display", "block");
 			// Wire up this.closeEditor.  Aspect.around is used so we can stop hide()
 			// from firing if equation is not entered.
 			aspect.around(this._nodeEditor, "hide", lang.hitch(this, function(doHide){
@@ -429,6 +436,10 @@ define([
 			// update Node labels upon exit
 			this.updateNodeLabel(this.currentID);
 
+			//end the tour
+			if(this.tour){
+				this.tour.end();
+			}
 			// In case any tool tips are still open.
 			typechecker.closePops();
 			//this.disableHandlers = false;
@@ -454,10 +465,9 @@ define([
 			if(this._previousExpression) //bug 2365
 				this._previousExpression=null; //clear the expression
 
-
 			// This cannot go in controller.js since _PM is only in
-			// con-student.	 You will need con-student to attach this
-			// to closeEditor (maybe using aspect.after?).	
+			// con-student.  You will need con-student to attach this
+			// to closeEditor (maybe using aspect.after?).
 		},
 
 		//update the node label
@@ -1003,6 +1013,26 @@ define([
 				//getDescriptionID is present only in student mode. So in author mode it will give an identity function. This is a work around in case when its in author mode at that time the given model is the actual model. So descriptionID etc are not available. 
 				var mapID = this._model.active.getDescriptionID || function(x){ return x; };
 				var unMapID = this._model.active.getNodeIDFor || function(x){ return x; };
+				
+				if(this._model.active.getType(this.currentID) === "accumulator" &&
+					!parse.variables().length && parse.tokens.length == 1 && parse.tokens[0].number_ == 0){
+					cancelUpdate = true;
+					directives.push({id: 'equation', attribute: 'status', value: 'incorrect'});
+					directives.push({
+						id: 'crisisAlert',
+						attribute: 'open',
+						value: "Equation of accumulator can not be set to 0. If this is the case then please change the type of the node to parameter."
+					});
+					this.logging.log("solution-step", {
+						type: "zero-equation-accumulator",
+						node: this._model.active.getName(this.currentID),
+						nodeID: this.currentID,
+						property: "equation",
+						value: inputEquation,
+						correctResult: this._model.given.getEquation(this.currentID),
+						checkResult: "INCORRECT"
+					});
+				}
 				array.forEach(parse.variables(), function(variable){
 					// Test if variable name can be found in given model
 
@@ -1172,7 +1202,7 @@ define([
 		},
 
 		// Hide the value and expression controls in the node editor, depending on the type of node	
-		adjustNodeEditor: function(type){
+		/*adjustNodeEditor: function(type){
 			if (type=="function"){
 				domStyle.set('valueDiv','visibility', 'hidden');
 				domStyle.set('expressionDiv', 'display', 'block');
@@ -1187,7 +1217,7 @@ define([
 				domStyle.set('valueDiv','visibility', 'visible');	
 				domStyle.set('initLabel', 'display', 'inline');
 			}
-		},
+		},*/
 
 		//show node editor
 		showNodeEditor: function(/*string*/ id){
@@ -1201,7 +1231,7 @@ define([
 
 			// Hide the value and expression controls in the node editor, depending on the type of node		
 			var type=this._model.active.getType(this.currentID);
-			this.adjustNodeEditor(type);
+			//this.adjustNodeEditor(type);
 
 			this._nodeEditor.show().then(lang.hitch(this, function(){
 				this.disableHandlers = false;
@@ -1225,6 +1255,27 @@ define([
 					nodeForumBut.set("disabled", true);
 				}
 			}
+			if(this.activityConfig.get("showNodeEditorTour")) {
+				var givenNodeID = this._model.active.getDescriptionID(id);
+				var steps = this._PM.generateTourSteps(givenNodeID, id, this._model.getNodeEditorTutorialState());
+				if (steps && steps.length > 0) {
+					this.tour = new Tour(steps);
+					this.tour.start();
+					var currentButton = this.tour._steps[0];
+					var currentStep = this.tour.getCurrentStep();
+					if(currentStep!== "default" && currentStep["type"] !== "default") {
+						domClass.toggle(dom.byId(currentButton["element"]), "active");
+					}
+
+					/** Check if Status counter for node editor tour be incremented
+					 *  If the tour steps returns first element as "default": flag is set to false
+					 *  else flag is true
+					 **/
+					this.incNodeTourCounter = steps[0] !== "default";
+				} else {
+					this.tour = null;
+				}
+			}
 		},
 
 		// Stub to be overwritten by student or author mode-specific method.
@@ -1234,6 +1285,7 @@ define([
 		},
 
 		populateNodeEditorFields: function(nodeid){
+			console.log("populate node editor fields enter");
 			//populate description
 			var model = this._model.active;
 			var editor = this._nodeEditor;
@@ -1313,6 +1365,53 @@ define([
 			this._forumparams=forum_params;
 		},
 
+		continueTour: function(directive){
+			var elements = {
+				description: "descriptionQuestionMark",
+				type: "typeQuestionMark",
+				inputs: "inputsQuestionMark",
+				equation: "expressionBoxQuestionMark",
+				checkExpression: "equationDoneButton",
+				initial: "initialValueQuestionMark",
+				units: "unitsQuestionMark",
+				operations: "operationsQuestionMark",
+				done: "closeButton"
+			};
+
+			if(directive.id === "description" && directive.attribute === "status" && directive.value === "correct"){
+				var givenNodeID = this._model.active.getDescriptionID(this.currentID);
+				var steps = this._PM.generateTourSteps(givenNodeID ,this.currentID,  this._model.getNodeEditorTutorialState());
+				if(steps && steps.length > 0) {
+					if(this.tour) {
+						this.tour.end();
+					}
+					this.tour = new Tour(steps);
+					/** Check if Status counter for node editor tour be incremented
+					 *  If the tour steps returns first element as "default": flag is set to false
+					 *  else flag is true
+					 **/
+					this.incNodeTourCounter = steps[0] !== "default";
+				}else{
+					this.tour = null;
+				}
+			}
+			if(this.tour && directive.attribute === "status" && directive.value !== "incorrect"){
+				//Remove the step and add it to the end
+				var currentStep = this.tour.getCurrentStep();
+				if(currentStep!== "default" && currentStep["type"] !== "default") {
+					domClass.remove(dom.byId(elements[directive.id]), "active");
+				}
+				this.tour.removeStep(elements[directive.id]);
+
+				this.tour.start();
+
+				var currentButton = this.tour.getStepByIndex(0);
+				if(currentButton !== "default" && currentStep["type"] !== "default") {
+					domClass.toggle(dom.byId(currentButton["element"]), "active");
+				}
+			}
+		},
+
 		/*
 		 Take a list of directives and apply them to the Node Editor,
 		 updating the model and updating the graph.
@@ -1321,10 +1420,11 @@ define([
 		 */
 		applyDirectives: function(directives, noModelUpdate){
 			// Apply directives, either from PM or the controller itself.
+			var tempDirective = null;
 			array.forEach(directives, function(directive) {
 				if(!noModelUpdate)
 					this.updateModelStatus(directive);
-				if (this.widgetMap[directive.id]) {
+				if (directive.attribute != "display" && this.widgetMap[directive.id]) {
 					var w = registry.byId(this.widgetMap[directive.id]);
 					if (directive.attribute == 'value') {
 						w.set("value", directive.value, false);
@@ -1343,6 +1443,13 @@ define([
 						// the model and the graph.
 					}else{
 						w.set(directive.attribute, directive.value);
+						if(directive.attribute === "status"){
+							tempDirective = directive;
+						}
+					}
+				}else if(directive.attribute == "display"){
+					if(this.genericDivMap[directive.id]){
+						domStyle.set(this.genericDivMap[directive.id], directive.attribute, directive.value);
 					}
 				}else if(directive.id == "tweakDirection"){
 					if (directive.attribute == 'value') {
@@ -1366,8 +1473,82 @@ define([
 						functionTag: 'applyDirectives'
 					});
 				}
-
 			}, this);
+
+			if(tempDirective && this.activityConfig.get("showNodeEditorTour")) {
+				this.continueTour(tempDirective);
+			}
+		},
+
+		//Shows Node border help tooltip
+		showNodeBorderTooltip: function (state) {
+			if(registry.byId("NodeBorderTooltipPopup")){
+				registry.byId("NodeBorderTooltipPopup").destroyRecursive();
+			}
+			var isMessageShown = false;
+			//Messages to show for node border help
+			var borderMessages = {
+				"dashed": "A dashed border means your node is incomplete. Click on this node to finish entering its values.",
+				"incorrect": "A <strong>red</strong> border means one of the values inside doesn't match the author. Click on the node to try again.",
+				"demo": "A <strong>yellow</strong> border means Dragoon gave you one or more of the answers.<br/> Try to get green next time!",
+				"correct": "A <strong>green</strong> border means you matched the author's model successfully. Good work!",
+				"perfect": "A <strong>green filled node</strong> means you matched the author's model successfully with no mistakes. Great job!"
+			};
+
+			var message = "<div id='NodeBorderMessages' style='padding: 5px'>";
+			//Check if node is complete
+			if(this._model.active.isComplete(this.currentID)){
+				//Get node correctness status
+				var correctness = this._model.active.getCorrectness(this.currentID);
+				if(correctness === "correct"){
+					//Check for perfect node with green background
+					if(this._model.active.getAssistanceScore(this.currentID) === 0  && !state["perfect"]) {
+						message += borderMessages["perfect"];
+						state["perfect"] = true;
+						isMessageShown = true;
+					}else if(this._model.active.getAssistanceScore(this.currentID) !== 0 && !state["correct"]){
+						//Correct - Green border
+						message += borderMessages[correctness];
+						state["correct"] = true;
+						isMessageShown = true;
+					}
+				}
+				else if(correctness && !state[correctness]){
+					//Incorrect or Demo - Red or yellow border
+					message += borderMessages[correctness];
+					state[correctness] = true;
+					isMessageShown = true;
+				}
+			}else if(this._model.active.getType(this.currentID) && !state["dashed"]){
+				//Incomplete Node - show dashed border message
+				message += borderMessages["dashed"];
+				state["dashed"] = true;
+				isMessageShown = true;
+			}
+
+			if(isMessageShown) {
+				message += '</div><button class="fRight" type="button" data-dojo-type="dijit/form/Button" id="nodeBorderOKBtn">OK</button><div class="spacer cBoth"></div>';
+				var nodeBorderTooltip = new TooltipDialog({
+					"id": "NodeBorderTooltipPopup",
+					"style": "width: 300px;",
+					"content": message,
+					onShow: function () {
+						console.log("Node border tooltip shown");
+						on(dojo.byId('nodeBorderOKBtn'), 'click', function (e) {
+							popup.close(nodeBorderTooltip);
+							nodeBorderTooltip.destroyRecursive();
+						});
+						focusUtil.focus(dom.byId('nodeBorderOKBtn'));
+					}
+				});
+				popup.open({
+					popup: nodeBorderTooltip,
+					around: dom.byId(this.currentID)
+				});
+
+				//Save tutorial state
+				this._model.setNodeBorderTutorialState(state);
+			}
 		},
 
 		// Stub to be overwritten by student or author mode-specific method.
